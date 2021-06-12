@@ -1,35 +1,59 @@
 const namee = document.querySelector(".name");
 const email = document.querySelector(".email");
-const password = document.querySelector(".password");
+// const password = document.querySelector(".password");
 const contact = document.querySelector(".contact");
-const dob = document.querySelector(".dob");
 const userTable = document.querySelector(".userTable");
+const dob = document.querySelector(".dob");
+const submitBtn = document.querySelector(".submitBtn");
 let setOfUser = [];
+let update = false;
+let user = {};
+let itemToEdit ;
+
+function emptyPlaceholder() {
+  namee.value = "";
+  email.value = "";
+  // password.value = "";
+  contact.value = "";
+  dob.value = "";
+}
+
+function fetchValue() {
+  user = {
+    User: namee.value,
+    Email: email.value,
+    Contact: contact.value,
+    DOB: dob.value,
+  };
+}
+
+submitBtn.addEventListener("click", () => {
+  if (update === true) {
+    setOfUser = JSON.parse(sessionStorage.getItem("userDetail"));
+    console.log(setOfUser);
+    fetchValue();
+    console.log(itemToEdit);
+    setOfUser.splice(itemToEdit, 1, user);
+    console.log(setOfUser);
+    sessionStorage.setItem("userDetail",JSON.stringify(setOfUser));
+    emptyPlaceholder();
+    submitBtn.innerHTML = "Submit";
+  }
+  display();
+});
 
 function addUser(e) {
-  document.querySelector(".password").style.border = "1px solid black";
   document.querySelector(".pass-label").style.visibility = "hidden";
 
   document.querySelector(".contact").style.border = "1px solid black";
   document.querySelector(".contact-label").style.visibility = "hidden";
-
-  if (password.value.length < 7) {
-    document.querySelector(".password").style.border = "1px solid red";
-    document.querySelector(".pass-label").style.visibility = "visible";
-    return false;
-  }
 
   if (contact.value.length !== 10) {
     document.querySelector(".contact").style.border = "1px solid red";
     document.querySelector(".contact-label").style.visibility = "visible";
     return false;
   } else {
-    const user = {
-      User: namee.value,
-      Email: email.value,
-      Contact: contact.value,
-      DOB: dob.value,
-    };
+    fetchValue();
 
     if (JSON.parse(sessionStorage.getItem("userDetail")) !== null) {
       // Do nothing
@@ -37,15 +61,12 @@ function addUser(e) {
     }
 
     setOfUser.push(user);
-    console.log(user);
+    // console.log(user);
 
     sessionStorage.setItem("userDetail", JSON.stringify(setOfUser));
 
-    namee.value = "";
-    email.value = "";
-    password.value = "";
-    contact.value = "";
-    dob.value = "";
+    emptyPlaceholder();
+
     display();
     return true;
   }
@@ -60,23 +81,22 @@ function display() {
             <th>Contact</th>
             <th>Action</th>
         </tr>`;
-    
+
     let userData = JSON.parse(sessionStorage.getItem("userDetail"));
     let length = userData.length;
     let output = "";
     for (let i = 0; i < length; i++) {
-
-      let tr = document.createElement("tr");	// Create a new element
-      let td1 = document.createElement("td");	// Create a new element
-      let td2 = document.createElement("td");	// Create a new element
-      let td3 = document.createElement("td");	// Create a new element
-      let td4 = document.createElement("td");	
-      let editBtn = document.createElement("button");	
-      let deleteBtn = document.createElement("button");	
+      let tr = document.createElement("tr"); // Create a new element
+      let td1 = document.createElement("td"); // Create a new element
+      let td2 = document.createElement("td"); // Create a new element
+      let td3 = document.createElement("td"); // Create a new element
+      let td4 = document.createElement("td");
+      let editBtn = document.createElement("button");
+      let deleteBtn = document.createElement("button");
       editBtn.innerHTML = "Edit";
       deleteBtn.innerHTML = "Delete";
-      // editBtn.setAttribute('id',i);
-      deleteBtn.setAttribute('id',i);
+      editBtn.setAttribute("id", i);
+      deleteBtn.setAttribute("id", i);
       td1.appendChild(document.createTextNode(userData[i].User));
       td2.appendChild(document.createTextNode(userData[i].Email));
       td3.appendChild(document.createTextNode(userData[i].Contact));
@@ -88,21 +108,32 @@ function display() {
       tr.appendChild(td4);
       userTable.appendChild(tr);
 
-      editBtn.addEventListener('click',(e)=>{
-        console.log(e.target.id);
+      setOfUser = JSON.parse(sessionStorage.getItem("userDetail"));
 
-      })
+      editBtn.addEventListener("click", (e) => {
+        itemToEdit = Number(e.target.id);
+        // console.log(itemToEdit);
+        // console.log(setOfUser[itemToEdit]);
+        namee.value = setOfUser[itemToEdit].User;
+        email.value = setOfUser[itemToEdit].Email;
+        contact.value = setOfUser[itemToEdit].Contact;
+        dob.value = setOfUser[itemToEdit].DOB;
+        submitBtn.innerHTML = "Update";
+        update = true;
 
-      deleteBtn.addEventListener('click',(e)=>{
+      });
+
+      submitBtn;
+
+      deleteBtn.addEventListener("click", (e) => {
         let itemToDelete = Number(e.target.id);
-        console.log(itemToDelete);
-        setOfUser = JSON.parse(sessionStorage.getItem("userDetail"));
-        console.log(setOfUser);
-        setOfUser.splice(itemToDelete,1);
-        console.log(setOfUser);
-        sessionStorage.setItem("userDetail",JSON.stringify(setOfUser));        
+        // console.log(itemToDelete);
+        // console.log(setOfUser);
+        setOfUser.splice(itemToDelete, 1);
+        // console.log(setOfUser);
+        sessionStorage.setItem("userDetail", JSON.stringify(setOfUser));
         display();
-      })
+      });
       // userTable.innerHTML += `<tr>
       //       <td>${userData[i].User}</td>
       //       <td>${userData[i].Email}</td>
@@ -112,7 +143,6 @@ function display() {
       //         <button onclick='callMe()'>Delete<button/>
       //       </td>
       //   </tr>`;
-
     }
   }
 }
